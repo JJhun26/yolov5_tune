@@ -29,12 +29,12 @@ while True:
             
             # TODO: OpenCV를 이용해서 해당 좌표에 사각형과 text를 출력
             obj_info = list(map(int, obj))
-            cv2.rectangle(rgb_frame, (x1,y1), (x2, y2), (0,255,0), 2)
-            cv2.putText(rgb_frame, f"conf:{conf:.2f}, class:{model.names[cls]}", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,0))
+            cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
+            cv2.putText(frame, f"conf:{conf:.2f}, class:{model.names[cls]}", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,0))
             print(f"Object {i}: {model.names[obj_info[5]]}")
 
         # TODO: 화면 표시
-        cv2.imshow("yolo", rgb_frame)
+        cv2.imshow("yolo", frame)
 
         # TODO: 종료를 위한 key 처리
         key = cv2.waitKey(1) & 0xff
