@@ -1,6 +1,7 @@
 --index-url https://download.pytorch.org/whl/cpu
 --extra-index-url https://pypi.org/simple
 colcon-common-extensions
+empy==3.3.4
 rosdep
 rosinstall_generator
 vcstool
@@ -9,3 +10,4 @@ torchvision==0.23.0+cpu
 yolov5
 onnx
 lark
+numpy<2.0
