@@ -1,6 +1,6 @@
 # YOLOv5 Finetuning
 
-YOLOv5를 finetune하고 결과물을 slide로 작성 하세요
+YOLOv5를 finetune하고 결과물을 slide로 작성해서 report.pdf 파일로 업로드하세요
 
 
 ## Dataset
