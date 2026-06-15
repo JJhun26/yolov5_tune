@@ -5,7 +5,7 @@ torchvision==0.23.0+cpu
 # YOLOv5 dependancies.
 gitpython>=3.1.30
 matplotlib>=3.3
-numpy>=1.23.5
+numpy==1.26.4
 opencv-python>=4.1.1
 Pillow>=10.0.1
 psutil  # system resources
@@ -18,4 +18,4 @@ ultralytics>=8.0.232
 pandas>=1.1.4
 seaborn>=0.11.0
 onnx>=1.10.0  # ONNX export
-setuptools>=65.5.1 # Snyk vulnerability fix
+setuptools==75.8.0
