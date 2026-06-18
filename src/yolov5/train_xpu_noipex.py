@@ -38,7 +38,6 @@ import torch.nn as nn
 import yaml
 from torch.optim import lr_scheduler
 from tqdm import tqdm
-import intel_extension_for_pytorch as ipex
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -197,15 +196,9 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
         model = Model(cfg, ch=3, nc=nc, anchors=hyp.get("anchors"))
     model = model.to(device)
 
-    # Patch model and optimizer for IPEX XPU
-    optimizer = smart_optimizer(model, opt.optimizer, hyp["lr0"], hyp["momentum"], hyp["weight_decay"])
-    model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if hasattr(torch, "xpu") and torch.xpu.is_bf16_supported() else torch.float32)
-
-    # Use XPU autocast and GradScaler
-    try:
-        from torch.xpu.amp import autocast
-    except ImportError:
-        autocast = None
+    # XPU mixed precision via native torch.amp (no IPEX required).
+    # Model stays on device as-is; optimizer is created below with scaled weight_decay.
+    amp = hasattr(torch, "xpu") and torch.xpu.is_available() and torch.xpu.is_bf16_supported()
 
     # Freeze
     freeze = [f"model.{x}." for x in (freeze if len(freeze) > 1 else range(freeze[0]))]
@@ -375,15 +368,7 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
                     imgs = nn.functional.interpolate(imgs, size=ns, mode="bilinear", align_corners=False)
 
             # Forward
-            if autocast:
-                with autocast(enabled=hasattr(torch, "xpu") and torch.xpu.is_bf16_supported()):
-                    pred = model(imgs)
-                    loss, loss_items = compute_loss(pred, targets.to(device))
-                    if RANK != -1:
-                        loss *= WORLD_SIZE
-                    if opt.quad:
-                        loss *= 4.0
-            else:
+            with torch.amp.autocast(device.type, dtype=torch.bfloat16, enabled=amp):
                 pred = model(imgs)
                 loss, loss_items = compute_loss(pred, targets.to(device))
                 if RANK != -1:
